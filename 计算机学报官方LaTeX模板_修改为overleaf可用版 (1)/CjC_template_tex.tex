@@ -1,0 +1,151 @@
+\documentclass[10.5pt,compsoc]{CjC}
+
+% The proposal is written in English and uses the supplied CjC layout.
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{url}
+\usepackage[noadjust]{cite}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{microtype}
+\usepackage{cuted}
+
+\setcounter{page}{1}
+\urlstyle{same}
+\setlength{\parindent}{2em}
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.08}
+\renewcommand{\figurename}{Figure}
+\renewcommand{\tablename}{Table}
+\newcommand{\upcite}[1]{\textsuperscript{\cite{#1}}}
+
+\headevenname{\mbox{\quad} \hfill \mbox{NLP Course Project Proposal} \hspace{35mm} \mbox{2026}}
+\headoddname{Track A Survey \hfill Retrieval-Augmented Generation for Large Language Models}
+
+\begin{document}
+\hyphenpenalty=50000
+\pagestyle{CjCheadings}
+\thispagestyle{empty}
+
+\begin{strip}
+\vspace{-13mm}
+\begin{center}
+\begin{minipage}{0.96\textwidth}
+\centering
+{\zihao{2}\bfseries A Taxonomy and Critical Review of Retrieval-Augmented Generation for Large Language Models\par}\vspace{3mm}
+{\zihao{4}\bfseries Project Proposal --- Track A: Survey}\\[4mm]
+{\zihao{3}\bfseries Niu Shuai$^{1)}$ \quad Peng Kun$^{1)}$ \quad Li Jiapu$^{1)}$}\\[2mm]
+{\zihao{6}$^{1)}$Nankai University, Tianjin 300350, China}\\[3mm]
+\hrulefill\par\vspace{2mm}
+\raggedright
+\zihao{5-}\textbf{Abstract}\quad Retrieval-augmented generation (RAG) combines a language model with an external retriever so that generation can use evidence beyond parametric memory. The area has grown rapidly, but papers use overlapping terminology and report results under incompatible retrieval sources, generators, and evaluation protocols. This proposal presents a Track A survey of RAG for large language models. We will organize the literature along four dimensions: retrieval, knowledge augmentation, generation integration, and evaluation. We will compare representative methods by evidence quality, factuality, attribution, efficiency, and adaptability, identify gaps in current benchmarks and analyses, and derive a research agenda for reliable and efficient RAG. The final survey will cover at least 20 academic papers and will follow the required eight-page report format.\\[2mm]
+\zihao{5-}\textbf{Keywords}\quad retrieval-augmented generation; large language models; information retrieval; factuality; attribution; survey
+\end{minipage}
+\end{center}
+\end{strip}
+
+\vspace{2mm}
+\section{Introduction: Background and Motivation}
+
+Large language models (LLMs) store substantial knowledge in their parameters, but their knowledge can be outdated, difficult to inspect, and unreliable for knowledge-intensive questions. Retrieval-augmented generation addresses these limitations by retrieving passages or structured records at inference time and conditioning a generator on the retrieved evidence. Early systems such as REALM\upcite{guu2020realm}, DPR\upcite{karpukhin2020dpr}, and the original RAG formulation\upcite{lewis2020rag} established the basic retrieve-then-generate paradigm. Later work introduced late-interaction retrieval\upcite{khattab2020colbert}, multi-passage fusion\upcite{izacard2021fid}, retrieval during pretraining\upcite{borgeaud2022retro}, in-context retrieval\upcite{ram2023incontext}, and self-reflective retrieval and critique\upcite{asai2024selfrag}.
+
+The fast expansion of this literature has created a synthesis problem. ``RAG'' may refer to a retriever, a prompting pattern, a jointly trained model, an agentic workflow, or an evaluation setting. Improvements in answer accuracy can also result from different corpus sizes, retriever strength, context budgets, or judge models. A structured survey is therefore needed to separate architectural choices from experimental conditions and to explain when a method is useful. Our survey will focus on text-based RAG for general-purpose LLMs, while noting multimodal, graph-based, and agentic extensions when they clarify the taxonomy. We will emphasize methods that retrieve external evidence at inference or training time, rather than general prompt engineering without an external knowledge source.
+
+\section{Problem Definition and Research Questions}
+
+The central question is: \emph{How should retrieval, evidence integration, and evaluation be organized to understand the reliability and efficiency of RAG systems for LLMs?} We will answer the following questions:
+
+\begin{enumerate}
+\item \textbf{RQ1: Retrieval.} How do sparse, dense, late-interaction, hybrid, and structured retrieval methods differ in coverage, precision, domain transfer, and computational cost?
+\item \textbf{RQ2: Integration.} How do systems select, compress, order, and use retrieved evidence, and how do these decisions affect long-context reasoning, hallucination, and source attribution?
+\item \textbf{RQ3: Adaptation.} What are the trade-offs among frozen retriever-generator pipelines, joint training, iterative retrieval, and self-reflective or agentic control?
+\item \textbf{RQ4: Evaluation.} Which metrics and datasets measure retrieval quality, answer correctness, faithfulness, citation quality, robustness, latency, and cost, and where do current evaluations remain incomplete?
+\end{enumerate}
+
+\section{Preliminary Literature and Survey Design}
+
+We will search ACL Anthology, DBLP, and arXiv using combinations of ``retrieval-augmented generation,'' ``retrieval-augmented language model,'' ``knowledge-intensive QA,'' ``grounded generation,'' and ``RAG evaluation.'' The initial scope is 2020--2025, with earlier information-retrieval and language-modeling papers retained when they are foundational. A paper will be included when it proposes, analyzes, or evaluates an external-retrieval component for language generation. For each paper, we will record the task, corpus, retriever, generator, training regime, context budget, evaluation metrics, and reported limitations. We will maintain a shared evidence table so that the final comparison distinguishes directly reported results from our interpretation.
+
+Our initial taxonomy is shown in Table~\ref{tab:taxonomy}. The dimensions are intended to be orthogonal enough for comparison while still covering systems that combine several strategies. A paper may therefore receive multiple labels when it uses, for example, hybrid retrieval and iterative evidence selection.
+
+\begin{strip}
+\centering
+\refstepcounter{table}\label{tab:taxonomy}
+\textbf{Table 1. Initial taxonomy and comparison axes for the planned survey.}\par\smallskip
+\begin{tabularx}{0.96\textwidth}{>{\raggedright\arraybackslash}p{29mm} X X}
+\toprule
+\textbf{Dimension} & \textbf{Representative classes} & \textbf{Comparison questions} \\
+\midrule
+Retrieval & sparse lexical; dense bi-encoder; late interaction; hybrid; graph or structured retrieval & What evidence is found, how robust is recall, and what are the latency and indexing costs? \\
+Evidence handling & top-$k$ passages; reranking; filtering; compression; citation-aware selection & How are relevance, redundancy, context length, and provenance balanced? \\
+Generation integration & prompt concatenation; multi-passage fusion; joint training; iterative retrieval; self-reflection or agents & Is retrieval fixed, learned jointly, or controlled by the model during reasoning? \\
+Evaluation & retrieval recall; answer correctness; faithfulness; attribution; robustness; efficiency & Does the evaluation isolate retrieval quality from generator ability and judge-model bias? \\
+\bottomrule
+\end{tabularx}
+\end{strip}
+
+\section{Expected Outcomes}
+
+The project will produce four concrete outcomes. First, it will provide a reproducible literature map with definitions, inclusion criteria, and a taxonomy that connects retrieval mechanisms to generation behavior. Second, it will present a comparison matrix for representative methods across task type, external memory, training signal, context use, evidence attribution, and resource requirements. Third, it will critically analyze recurring weaknesses, including inconsistent corpora and baselines, weak measurement of citation faithfulness, sensitivity to irrelevant or adversarial passages, long-context cost, and limited out-of-domain testing. Fourth, it will propose future directions such as evaluation protocols that separately score retrieval and reasoning, adaptive evidence budgets, provenance-preserving generation, and efficient retrieval for domain-specific or continuously updated knowledge.
+
+The final report will contain the required background, technical classification, method comparison, open problems, and future research directions. It will target at least 20 relevant academic papers, include a concise comparison table and a taxonomy figure, and clearly distinguish observations supported by the literature from our own synthesis. No new model training is required for this Survey track; a small reproducibility check may be used only to clarify an evaluation protocol and will not be presented as a new experimental contribution.
+
+\section{Team Responsibilities and Timeline}
+
+The division of work gives each member ownership of a substantive part while requiring cross-reading of the complete survey.
+
+\begin{center}
+\small
+\textbf{Table 2. Team responsibilities.}\par\smallskip
+\centering
+\begin{tabularx}{\columnwidth}{>{\raggedright\arraybackslash}p{25mm} X}
+\toprule
+\textbf{Member} & \textbf{Primary responsibility} \\
+\midrule
+Niu Shuai (2312659) & Project coordination; retrieval and evidence-integration taxonomy; synthesis of the final comparison. \\
+Peng Kun (2313276) & Evaluation taxonomy; benchmark and metric analysis; critical comparison of factuality, faithfulness, and efficiency results. \\
+Li Jiapu (2314007) & Literature collection; training, iterative, and agentic RAG taxonomy; evidence-table maintenance and reproducibility checks. \\
+All members & Weekly cross-review, reference verification, writing revision, and preparation for the final presentation and Q\&A. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+\begin{center}
+\small
+\textbf{Table 3. Planned project timeline.}\par\smallskip
+\centering
+\begin{tabularx}{\columnwidth}{p{18mm} X}
+\toprule
+\textbf{Period} & \textbf{Milestone} \\
+\midrule
+Week 1 & Finalize scope, search strings, inclusion criteria, and shared evidence-table schema. \\
+Weeks 2--3 & Collect and annotate the initial bibliography; record methods, settings, metrics, and limitations. \\
+Week 4 & Consolidate the taxonomy and complete the first method-comparison matrix. \\
+Weeks 5--6 & Draft the survey sections, open-problem analysis, taxonomy figure, and future-work agenda. \\
+Week 7 & Cross-review, verify every citation and claim, format the eight-page final report, and prepare slides. \\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+The plan is feasible because the project has a bounded text-only scope, public literature sources, and a staged annotation process. The main risk is that the term RAG covers too many rapidly changing systems. We will control scope by applying the inclusion criteria above, reporting a clear cutoff date, and placing multimodal or highly agentic systems in explicitly marked extensions rather than allowing them to change the core taxonomy.
+
+\section*{References}
+
+\begin{thebibliography}{99}
+\bibitem{guu2020realm} Guu C, Lee K, Tung Z, et al. REALM: Retrieval-Augmented Language Model Pre-Training. In: ICML. 2020.
+\bibitem{karpukhin2020dpr} Karpukhin V, Oguz B, Min S, et al. Dense Passage Retrieval for Open-Domain Question Answering. In: EMNLP. 2020.
+\bibitem{lewis2020rag} Lewis P, Perez E, Piktus A, et al. Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks. In: NeurIPS. 2020.
+\bibitem{khattab2020colbert} Khattab O, Zaharia M. ColBERT: Efficient and Effective Passage Search via Contextualized Late Interaction over BERT. In: SIGIR. 2020.
+\bibitem{izacard2021fid} Izacard G, Grave E. Leveraging Passage Retrieval with Generative Models for Open Domain Question Answering. In: EACL. 2021.
+\bibitem{borgeaud2022retro} Borgeaud S, Mensch A, Hoffmann J, et al. Improving Language Models by Retrieving from Trillions of Tokens. In: ICML. 2022.
+\bibitem{ram2023incontext} Ram O, Levine Y, Dalmedigos I, et al. In-Context Retrieval-Augmented Language Models. Transactions of the Association for Computational Linguistics, 2023.
+\bibitem{mallen2023trust} Mallen A, Asai A, Zhong V, et al. When Not to Trust Language Models: Investigating Effectiveness of Parametric and Non-Parametric Memories. In: ACL. 2023.
+\bibitem{gao2023survey} Gao Y, Xiong Y, Gao X, et al. Retrieval-Augmented Generation for Large Language Models: A Survey. arXiv preprint arXiv:2312.10997, 2023.
+\bibitem{asai2024selfrag} Asai A, Wu Z, Wang Y, et al. Self-RAG: Learning to Retrieve, Generate, and Critique through Self-Reflection. In: ICLR. 2024.
+\bibitem{es2024ragas} Es S, James J, Espinosa-Anke L, Schockaert S. RAGAS: Automated Evaluation of Retrieval Augmented Generation. In: EACL Demonstrations. 2024.
+\end{thebibliography}
+
+\end{document}
